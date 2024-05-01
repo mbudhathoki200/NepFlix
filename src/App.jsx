@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Watched from "./Components/Watched";
+import Movies from "./Components/Movies";
 
 const tempMovieData = [
   {
@@ -46,12 +48,18 @@ const tempWatchedData = [
     userRating: 9,
   },
 ];
+const average = (arr) =>
+  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 export default function App() {
   const [query, setQuery] = useState();
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
   const [isOpen1, setIsOpen1] = useState(true);
   const [isOpen2, setIsOpen2] = useState(true);
+
+  const avgUserRating = average(watched.map((movie) => movie.userRating));
+  const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
+  const avgRuntime = average(watched.map((movie) => movie.runtime));
   return (
     <>
       <nav className="grid grid-cols-[1fr_1fr_1fr] items-center h-16 px-16 bg-primary rounded-md m-5">
@@ -70,14 +78,59 @@ export default function App() {
           Found <strong> {movies.length} </strong> results
         </p>
       </nav>
-      <main>
-        <div>
+      <main className="flex justify-center gap-8 mt-7 h-[80vh] ">
+        <div className="w-[25rem] max-w-[25rem] bg-slate-800 rounded-lg overflow-scroll relative">
           <button
-            className="absolute z-50 h-10 font-bold text-white border-none rounded-full cursor-pointer top-2 right-2 aspect-square bg-slate-600"
+            className="absolute z-50 h-[1.5rem] font-bold text-white border-none rounded-full cursor-pointer top-[0.8rem] right-[0.8rem] aspect-square bg-slate-900 justify-center"
             onClick={() => setIsOpen1((open) => !open)}
           >
             {isOpen1 ? "-" : "+"}
           </button>
+          {isOpen1 && (
+            <ul className="px-2 divide-y divide-stone-400">
+              {movies.map((movie) => (
+                <Movies key={movie.imdbID} movie={movie} />
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="w-[25rem] max-w-[25rem] bg-slate-800 border-md rounded-lg overflow-scroll relative">
+          <button
+            className="absolute z-50 h-[1.5rem] font-bold text-white border-none rounded-full cursor-pointer top-[0.8rem] right-[0.8rem] aspect-square bg-slate-900"
+            onClick={() => setIsOpen2((open) => !open)}
+          >
+            {isOpen2 ? "-" : "+"}
+          </button>
+          {isOpen2 && (
+            <>
+              <div className="flex flex-col gap-1 p-5 text-sm rounded-xl text-slate-200 bg-slate-700">
+                <h2 className="font-semibold uppercase">Movies you watched</h2>
+                <div className="flex gap-4 font-semibold">
+                  <p className="flex gap-2">
+                    <span>#️⃣</span>
+                    <span>{watched.length} movies</span>
+                  </p>
+                  <p className="flex gap-2">
+                    <span>⭐️</span>
+                    <span>{avgImdbRating}</span>
+                  </p>
+                  <p className="flex gap-2">
+                    <span>🌟</span>
+                    <span>{avgUserRating}</span>
+                  </p>
+                  <p className="flex gap-2">
+                    <span>⏳</span>
+                    <span>{avgRuntime} min</span>
+                  </p>
+                </div>
+              </div>
+              <ul className="px-2 divide-y divide-stone-400">
+                {watched.map((movie) => (
+                  <Watched key={movie.imdbID} movie={movie} />
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </main>
     </>
