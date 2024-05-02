@@ -56,18 +56,24 @@ export default function App() {
 
   return (
     <>
-      <NavBar movies={movies} />
-      <Main movies={movies} />
+      <NavBar>
+        <NumResults movies={movies} />
+      </NavBar>
+      <Main>
+        <ListBox>
+          <MovieList movies={movies} />
+        </ListBox>
+      </Main>
     </>
   );
 }
 
-function NavBar({ movies }) {
+function NavBar({ children }) {
   return (
     <nav className="grid grid-cols-[1fr_1fr_1fr] items-center h-16 px-16 bg-primary rounded-md m-5">
       <Logo />
       <Search />
-      <NumResults movies={movies} />
+      {children}
     </nav>
   );
 }
@@ -99,15 +105,15 @@ function Search() {
     />
   );
 }
-function Main({ movies }) {
+function Main({ children }) {
   return (
     <main className="flex justify-center gap-8 mt-7 h-[80vh] ">
-      <ListBox movies={movies} />
+      {children}
       <WatchedBox />
     </main>
   );
 }
-function ListBox({ movies }) {
+function ListBox({ children }) {
   const [isOpen1, setIsOpen1] = useState(true);
   return (
     <div className="w-[25rem] max-w-[25rem] bg-slate-800 rounded-lg overflow-auto relative">
@@ -117,7 +123,7 @@ function ListBox({ movies }) {
       >
         {isOpen1 ? "-" : "+"}
       </button>
-      {isOpen1 && <MovieList movies={movies} />}
+      {isOpen1 && children}
     </div>
   );
 }
