@@ -53,6 +53,7 @@ const average = (arr) =>
 
 export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
 
   return (
     <>
@@ -60,9 +61,13 @@ export default function App() {
         <NumResults movies={movies} />
       </NavBar>
       <Main>
-        <ListBox>
+        <Box>
           <MovieList movies={movies} />
-        </ListBox>
+        </Box>
+        <Box>
+          <WatchedSummery watched={watched} />
+          <WatchedMovieList watched={watched} />
+        </Box>
       </Main>
     </>
   );
@@ -107,12 +112,24 @@ function Search() {
 }
 function Main({ children }) {
   return (
-    <main className="flex justify-center gap-8 mt-7 h-[80vh] ">
-      {children}
-      <WatchedBox />
-    </main>
+    <main className="flex justify-center gap-8 mt-7 h-[80vh] ">{children}</main>
   );
 }
+function Box({ children }) {
+  const [isOpen, setIsOpen] = useState(true);
+  return (
+    <div className="w-[25rem] max-w-[25rem] bg-slate-800 rounded-lg overflow-auto relative">
+      <button
+        className="absolute z-50 h-[1.5rem] font-bold text-white border-none rounded-full cursor-pointer top-[0.8rem] right-[0.8rem] aspect-square bg-slate-900 justify-center"
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        {isOpen ? "-" : "+"}
+      </button>
+      {isOpen && children}
+    </div>
+  );
+}
+/*
 function ListBox({ children }) {
   const [isOpen1, setIsOpen1] = useState(true);
   return (
@@ -127,15 +144,8 @@ function ListBox({ children }) {
     </div>
   );
 }
-function MovieList({ movies }) {
-  return (
-    <ul className="px-2 divide-y divide-stone-400">
-      {movies.map((movie) => (
-        <Movies key={movie.imdbID} movie={movie} />
-      ))}
-    </ul>
-  );
-}
+*/
+/*
 function WatchedBox() {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isOpen2, setIsOpen2] = useState(true);
@@ -157,6 +167,17 @@ function WatchedBox() {
     </div>
   );
 }
+*/
+function MovieList({ movies }) {
+  return (
+    <ul className="px-2 divide-y divide-stone-400">
+      {movies.map((movie) => (
+        <Movies key={movie.imdbID} movie={movie} />
+      ))}
+    </ul>
+  );
+}
+
 function WatchedMovieList({ watched }) {
   return (
     <ul className="px-2 divide-y divide-stone-400">
