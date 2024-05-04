@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Movies from "./Components/Movies";
 import Watched from "./Components/Watched";
 
@@ -51,19 +51,32 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
+const KEY = "fe9ffbb8";
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
-  const [watched, setWatched] = useState(tempWatchedData);
+  const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const query = "interstellar";
 
+  useEffect(function () {
+    async function fetchMovies() {
+      setIsLoading(true);
+      const res = await fetch(
+        `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+      );
+      const data = await res.json();
+      setMovies(data.Search);
+      setIsLoading(false);
+    }
+    fetchMovies();
+  }, []);
   return (
     <>
       <NavBar>
         <NumResults movies={movies} />
       </NavBar>
       <Main>
-        <Box>
-          <MovieList movies={movies} />
-        </Box>
+        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
         <Box>
           <WatchedSummery watched={watched} />
           <WatchedMovieList watched={watched} />
@@ -72,7 +85,13 @@ export default function App() {
     </>
   );
 }
-
+function Loader() {
+  return (
+    <p className="flex items-center justify-center font-bold text-white uppercase h-1/2">
+      Loading...
+    </p>
+  );
+}
 function NavBar({ children }) {
   return (
     <nav className="grid grid-cols-[1fr_1fr_1fr] items-center h-16 px-16 bg-primary rounded-md m-5">
@@ -93,7 +112,7 @@ function Logo() {
   return (
     <div className="flex space-x-2">
       <span className="text-xl">🍿</span>
-      <h1 className="text-xl font-bold text-white">NepFlix</h1>
+      <h1 className="text-xl font-bold text-white ">NepFlix</h1>
     </div>
   );
 }
