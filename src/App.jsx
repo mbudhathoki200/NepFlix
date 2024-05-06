@@ -239,7 +239,7 @@ function WatchedBox() {
       </button>
       {isOpen2 && (
         <>
-          <WatchedSummery watched={watched} />
+          <WatchedSummery watched={watched} />https://htmlcolorcodes.com/
           <WatchedMovieList watched={watched} />
         </>
       )}
@@ -262,6 +262,18 @@ function MovieList({ movies, onSelectMovie }) {
 }
 
 function MovieDetails({ selectedId, onCloseMovie }) {
+  const [movie, setMovie] = useState({});
+  const { Title: title, Year: year } = movie;
+  useEffect(() => {
+    async function getMovieDetails() {
+      const res = await fetch(
+        `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
+      );
+      const data = await res.json();
+      setMovie(data);
+    }
+    getMovieDetails();
+  }, []);
   return (
     <div className="text-white">
       <button
