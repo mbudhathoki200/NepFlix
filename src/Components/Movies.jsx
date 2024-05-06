@@ -1,9 +1,13 @@
 import React from "react";
 
-const Movies = ({ movie }) => {
+const Movies = ({ movie, onSelectMovie }) => {
   const { imdbID, Poster, Title, Year } = movie;
   return (
-    <li key={imdbID} className="flex gap-4 px-4 py-3 mt-2">
+    <li
+      key={imdbID}
+      className="flex gap-4 px-4 py-3 hover:bg-slate-700"
+      onClick={() => onSelectMovie(movie.imdbID)}
+    >
       <img src={Poster} alt={`${Title} poster`} className="h-20 mt-2" />
       <div className="flex flex-col justify-center px-2 pt-3">
         <h3 className="text-xl font-semibold text-white">{Title}</h3>

@@ -57,44 +57,84 @@ export default function App() {
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const query = "";
+  const [query, setQuery] = useState("interstellar");
+  const [selectedId, SetSelectedId] = useState(null);
 
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-        );
-        if (!res.ok)
-          throw new Error("Spmething went wrong ahile fetching movies");
+  const tempQuery = "interstellar";
 
-        const data = await res.json();
-        if (data.Response == "False") throw new Error("Movie not Found");
-        setMovies(data.Search);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
+  // useEffect(() => {
+  //   console.log("A");
+  // }, []);
+
+  // useEffect(() => {
+  //   console.log("B");
+  // });
+  // console.log("C");
+  function handleSelectMovie(id) {
+    SetSelectedId((selectedId) => (id === selectedId ? null : id));
+  }
+
+  function handleCloseMovie() {
+    SetSelectedId(null);
+  }
+
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setIsLoading(true);
+          setError("");
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          );
+          if (!res.ok)
+            throw new Error("Spmething went wrong ahile fetching movies");
+
+          const data = await res.json();
+          if (data.Response == "False") throw new Error("Movie not Found");
+          setMovies(data.Search);
+        } catch (error) {
+          setError(error.message);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
-    fetchMovies();
-  }, []);
+      if (query.length < 3) {
+        setMovies([]);
+        setError("");
+        return;
+      }
+      fetchMovies();
+    },
+    [query]
+  );
   return (
     <>
       <NavBar>
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </NavBar>
       <Main>
         {/* {isLoading ? <Loader /> : <MovieList movies={movies} />} */}
         <Box>
           {isLoading && <Loader />}
-          {!isLoading && !error && <MovieList movies={movies} />}
+          {!isLoading && !error && (
+            <MovieList movies={movies} onSelectMovie={handleSelectMovie} />
+          )}
           {error && <ErrorMessage message={error} />}
         </Box>
         <Box>
-          <WatchedSummery watched={watched} />
-          <WatchedMovieList watched={watched} />
+          {selectedId ? (
+            <MovieDetails
+              selectedId={selectedId}
+              onCloseMovie={handleCloseMovie}
+            />
+          ) : (
+            <>
+              <WatchedSummery watched={watched} />
+              <WatchedMovieList watched={watched} />
+            </>
+          )}
         </Box>
       </Main>
     </>
@@ -119,7 +159,6 @@ function NavBar({ children }) {
   return (
     <nav className="grid grid-cols-[1fr_1fr_1fr] items-center h-16 px-16 bg-primary rounded-md m-5">
       <Logo />
-      <Search />
       {children}
     </nav>
   );
@@ -139,9 +178,7 @@ function Logo() {
     </div>
   );
 }
-function Search() {
-  const [query, setQuery] = useState();
-
+function Search({ query, setQuery }) {
   return (
     <input
       type="text"
@@ -210,16 +247,33 @@ function WatchedBox() {
   );
 }
 */
-function MovieList({ movies }) {
+function MovieList({ movies, onSelectMovie }) {
   return (
-    <ul className="px-2 divide-y divide-stone-400">
+    <ul className="px-2 mt-2 divide-y divide-stone-400">
       {movies.map((movie) => (
-        <Movies key={movie.imdbID} movie={movie} />
+        <Movies
+          key={movie.imdbID}
+          movie={movie}
+          onSelectMovie={onSelectMovie}
+        />
       ))}
     </ul>
   );
 }
 
+function MovieDetails({ selectedId, onCloseMovie }) {
+  return (
+    <div className="text-white">
+      <button
+        onClick={onCloseMovie}
+        className="absolute z-50 m-3 text-xl font-extrabold text-black bg-white rounded-full w-7 aspect-square"
+      >
+        &larr;
+      </button>
+      {selectedId}
+    </div>
+  );
+}
 function WatchedMovieList({ watched }) {
   return (
     <ul className="px-2 divide-y divide-stone-400">
