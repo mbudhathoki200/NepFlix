@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Movies from "./Components/Movies";
 import Watched from "./Components/Watched";
+import StarRating from "./Components/StarRating";
 
 const tempMovieData = [
   {
@@ -62,14 +63,6 @@ export default function App() {
 
   const tempQuery = "interstellar";
 
-  // useEffect(() => {
-  //   console.log("A");
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log("B");
-  // });
-  // console.log("C");
   function handleSelectMovie(id) {
     SetSelectedId((selectedId) => (id === selectedId ? null : id));
   }
@@ -88,7 +81,7 @@ export default function App() {
             `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
           );
           if (!res.ok)
-            throw new Error("Spmething went wrong ahile fetching movies");
+            throw new Error("Something went wrong ahile fetching movies");
 
           const data = await res.json();
           if (data.Response == "False") throw new Error("Movie not Found");
@@ -142,7 +135,7 @@ export default function App() {
 }
 function Loader() {
   return (
-    <p className="flex items-center justify-center font-bold text-white uppercase h-1/2">
+    <p className="flex items-center justify-center font-bold text-white uppercase h-[70vh]">
       Loading...
     </p>
   );
@@ -263,26 +256,83 @@ function MovieList({ movies, onSelectMovie }) {
 
 function MovieDetails({ selectedId, onCloseMovie }) {
   const [movie, setMovie] = useState({});
-  const { Title: title, Year: year } = movie;
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const {
+    Title: title,
+    Year: year,
+    Poster: poster,
+    Runtime: runtime,
+    imdbRating,
+    Plot: plot,
+    Released: released,
+    Actors: actors,
+    Director: director,
+    Genre: genre,
+  } = movie;
+
   useEffect(() => {
     async function getMovieDetails() {
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
-      );
-      const data = await res.json();
-      setMovie(data);
+      try {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
+        );
+        if (!res.ok) {
+          throw new Error("Fetching Error!!");
+        }
+        const data = await res.json();
+        setMovie(data);
+        setIsLoading(false);
+      } catch (error) {
+        setError(error.message);
+      }
     }
     getMovieDetails();
-  }, []);
+  }, [selectedId]);
   return (
     <div className="text-white">
-      <button
-        onClick={onCloseMovie}
-        className="absolute z-50 m-3 text-xl font-extrabold text-black bg-white rounded-full w-7 aspect-square"
-      >
-        &larr;
-      </button>
-      {selectedId}
+      {error && <ErrorMessage message={error} />}
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <button
+            onClick={onCloseMovie}
+            className="absolute z-50 m-3 text-xl font-extrabold text-black bg-white rounded-full w-7 aspect-square"
+          >
+            &larr;
+          </button>
+          <header className="flex items-center gap-5 bg-slate-700">
+            <img
+              src={poster}
+              alt={`Poster of ${title} movie`}
+              className="h-[10rem] max-h-[10rem] w-[7rem]"
+            />
+            <div className="flex flex-col gap-2 ">
+              <h2 className="font-extrabold">{title}</h2>
+              <p className="text-sm">
+                {released} &bull; {runtime}
+              </p>
+              <p className="text-sm">{genre}</p>
+              <p className="text-sm">
+                <span>⭐</span>
+                {imdbRating} IMDb rating
+              </p>
+            </div>
+          </header>
+          <div className="flex items-center justify-center px-1 py-3 mx-8 mt-4 rounded-md bg-slate-700">
+            <StarRating maxRating={10} size={24} />
+          </div>
+          <section className="flex flex-col gap-4 p-5 text-sm">
+            <p>
+              <em>{plot}</em>
+            </p>
+            <p>Starring {actors}</p>
+            <p>Directed by {director}</p>
+          </section>
+        </>
+      )}
     </div>
   );
 }
