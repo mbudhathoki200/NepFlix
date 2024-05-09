@@ -70,6 +70,13 @@ export default function App() {
   function handleCloseMovie() {
     SetSelectedId(null);
   }
+  function handleAddWatched(movie) {
+    setWatched((watched) => [...watched, movie]);
+  }
+
+  function handleDeleteWatched(id) {
+    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
+  }
 
   useEffect(
     function () {
@@ -121,11 +128,16 @@ export default function App() {
             <MovieDetails
               selectedId={selectedId}
               onCloseMovie={handleCloseMovie}
+              onAddWatched={handleAddWatched}
+              watched={watched}
             />
           ) : (
             <>
               <WatchedSummery watched={watched} />
-              <WatchedMovieList watched={watched} />
+              <WatchedMovieList
+                watched={watched}
+                onDeleteMovie={handleDeleteWatched}
+              />
             </>
           )}
         </Box>
@@ -254,10 +266,18 @@ function MovieList({ movies, onSelectMovie }) {
   );
 }
 
-function MovieDetails({ selectedId, onCloseMovie }) {
+function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [userRating, setUserRating] = useState("");
+
+  const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
+
+  const watchedUserRating = watched.find(
+    (movie) => movie.imdbID === selectedId
+  )?.userRating;
+
   const {
     Title: title,
     Year: year,
@@ -270,6 +290,20 @@ function MovieDetails({ selectedId, onCloseMovie }) {
     Director: director,
     Genre: genre,
   } = movie;
+
+  function handleAdd() {
+    const newWatchedMovie = {
+      imdbID: selectedId,
+      title,
+      year,
+      poster,
+      imdbRating: Number(imdbRating),
+      runtime: runtime.split(" ").at(0),
+      userRating,
+    };
+    onAddWatched(newWatchedMovie);
+    onCloseMovie();
+  }
 
   useEffect(() => {
     async function getMovieDetails() {
@@ -321,8 +355,29 @@ function MovieDetails({ selectedId, onCloseMovie }) {
               </p>
             </div>
           </header>
-          <div className="flex items-center justify-center px-1 py-3 mx-8 mt-4 rounded-md bg-slate-700">
-            <StarRating maxRating={10} size={24} />
+          <div className="flex flex-col items-center justify-center px-1 py-3 mx-8 mt-4 rounded-md bg-slate-700 ">
+            {!isWatched ? (
+              <>
+                <StarRating
+                  maxRating={10}
+                  size={24}
+                  onSetRating={setUserRating}
+                />
+                {userRating > 0 && (
+                  <button
+                    className="px-24 py-2 mt-5 mb-1 text-sm font-bold bg-primaryLight rounded-3xl"
+                    onClick={handleAdd}
+                  >
+                    + Add to list
+                  </button>
+                )}
+              </>
+            ) : (
+              <p>
+                You rated this movie : {watchedUserRating}
+                <span>⭐</span>
+              </p>
+            )}
           </div>
           <section className="flex flex-col gap-4 p-5 text-sm">
             <p>
@@ -336,11 +391,15 @@ function MovieDetails({ selectedId, onCloseMovie }) {
     </div>
   );
 }
-function WatchedMovieList({ watched }) {
+function WatchedMovieList({ watched, onDeleteMovie }) {
   return (
     <ul className="px-2 divide-y divide-stone-400">
       {watched.map((movie) => (
-        <Watched key={movie.imdbID} movie={movie} />
+        <Watched
+          key={movie.imdbID}
+          movie={movie}
+          onDeleteMovie={onDeleteMovie}
+        />
       ))}
     </ul>
   );
@@ -359,11 +418,11 @@ function WatchedSummery({ watched }) {
         </p>
         <p className="flex gap-2">
           <span>⭐️</span>
-          <span>{avgImdbRating}</span>
+          <span>{avgImdbRating.toFixed(2)}</span>
         </p>
         <p className="flex gap-2">
           <span>🌟</span>
-          <span>{avgUserRating}</span>
+          <span>{avgUserRating.toFixed(2)}</span>
         </p>
         <p className="flex gap-2">
           <span>⏳</span>
