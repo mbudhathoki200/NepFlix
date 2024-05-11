@@ -58,7 +58,7 @@ export default function App() {
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [query, setQuery] = useState("interstellar");
+  const [query, setQuery] = useState("");
   const [selectedId, SetSelectedId] = useState(null);
 
   const tempQuery = "interstellar";
@@ -109,6 +109,7 @@ export default function App() {
         setError("");
         return;
       }
+      handleCloseMovie();
       fetchMovies();
       return function () {
         controller.abort();
@@ -116,6 +117,7 @@ export default function App() {
     },
     [query]
   );
+
   return (
     <>
       <NavBar>
@@ -312,12 +314,17 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     onAddWatched(newWatchedMovie);
     onCloseMovie();
   }
+
   useEffect(() => {
-    document.addEventListener("keydown", function (e) {
+    function callback(e) {
       if (e.code == "Escape") {
         onCloseMovie();
       }
-    });
+    }
+    document.addEventListener("keydown", callback);
+    return function () {
+      document.removeEventListener("keydown", callback);
+    };
   }, [onCloseMovie]);
 
   useEffect(() => {
