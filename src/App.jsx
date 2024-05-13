@@ -55,11 +55,15 @@ const average = (arr) =>
 const KEY = "fe9ffbb8";
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [selectedId, SetSelectedId] = useState(null);
+  // const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
+  });
 
   const tempQuery = "interstellar";
 
@@ -72,11 +76,15 @@ export default function App() {
   }
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
+    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watched));
+  }, [watched]);
 
   useEffect(
     function () {
@@ -172,7 +180,7 @@ function ErrorMessage({ message }) {
 }
 function NavBar({ children }) {
   return (
-    <nav className="grid grid-cols-[1fr_1fr_1fr] items-center h-16 px-16 bg-primary rounded-md m-5">
+    <nav className="grid grid-cols-[1fr_1fr_1fr] items-center h-16 sm:px-16 bg-primary rounded-md m-5">
       <Logo />
       {children}
     </nav>
