@@ -468,9 +468,9 @@ function WatchedMovieList({ watched, onDeleteMovie }) {
   );
 }
 function WatchedSummery({ watched }) {
-  const avgUserRating = average(watched.map((movie) => movie.userRating));
-  const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
-  const avgRuntime = average(watched.map((movie) => movie.runtime));
+  const avgUserRating = average(watched?.map((movie) => movie.userRating));
+  const avgImdbRating = average(watched?.map((movie) => movie.imdbRating));
+  const avgRuntime = average(watched?.map((movie) => movie.runtime));
   return (
     <div className="flex flex-col gap-1 p-5 text-sm rounded-xl text-slate-200 bg-slate-700">
       <h2 className="font-semibold uppercase">Movies you watched</h2>
